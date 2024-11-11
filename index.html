@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulir Dispensasi Sekolah</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+    <style>
+        /* CSS Styling */
+        body, html {
+            font-family: Arial, sans-serif;
+            background-color: #f5f7fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            background-color: #ffffff;
+            padding: 25px 30px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 1em;
+            color: #555;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.95em;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 1em;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .export-buttons button {
+            flex: 1;
+        }
+
+        #pdf-preview {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Formulir Dispensasi Sekolah</h1>
+    <form id="dispensasiForm">
+        <div class="form-group">
+            <label for="nama">Nama Lengkap</label>
+            <input type="text" id="nama" name="nama" required>
+        </div>
+        <div class="form-group">
+            <label for="tanggalLahir">Tanggal Lahir</label>
+            <input type="date" id="tanggalLahir" name="tanggalLahir" required>
+        </div>
+        <div class="form-group">
+            <label for="keperluan">Keperluan Dispensasi</label>
+            <textarea id="keperluan" name="keperluan" rows="4" required></textarea>
+        </div>
+        <button type="button" onclick="generateSurat()">Generate Surat</button>
+    </form>
+
+    <div class="export-buttons">
+        <button onclick="previewPDF()">Preview PDF</button>
+        <button onclick="exportSurat()">Download PDF</button>
+    </div>
+</div>
+
+<!-- Tempat untuk menampilkan pratinjau PDF -->
+<div id="pdf-preview"></div>
+
+<script>
+    function generateSurat() {
+        const nama = document.getElementById('nama').value;
+        const tanggalLahir = document.getElementById('tanggalLahir').value;
+        const keperluan = document.getElementById('keperluan').value;
+
+        if (!nama || !tanggalLahir || !keperluan) {
+            alert('Harap isi semua kolom!');
+            return;
+        }
+
+        const suratContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ccc;">
+            <!-- Header -->
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="font-size: 20px; margin: 0; font-weight: bold;">PEMERINTAH DAERAH PROVINSI JAWA BARAT</h2>
+                <h3 style="font-size: 20px; margin: 0; font-weight: bold;">DINAS PENDIDIKAN</h3>
+                <h4 style="font-size: 30px; margin: 0; font-weight: bold;">SMA NEGERI JATINUNGGAL</h4>
+                <p style="font-size: 20px; margin-top: 10px;">Jalan Tarikolot Jatinunggal, Telp. (0262) 428590 Sumedang 45376</p>
+            </div>
+
+            <!-- Nomor Surat, Lampiran, dan Perihal -->
+            <div style="margin-bottom: 20px;">
+                <p style="margin: 0;">Nomor: 123/SMAN-JTG/2024</p>
+                <p style="margin: 0;">Lampiran: -</p>
+                <p style="margin: 0;">Perihal: Permohonan Dispensasi</p>
+            </div>
+
+            <!-- Penerima Surat -->
+            <div style="margin-bottom: 20px;">
+                <p>Kepada Yth.,</p>
+                <p>Kepala Sekolah SMA Negeri Jatinunggal</p>
+                <p>di Tempat</p>
+            </div>
+
+            <!-- Salam Pembuka -->
+            <p>Dengan hormat,</p>
+
+            <!-- Identitas Pemohon -->
+            <p>Yang bertanda tangan di bawah ini:</p>
+            <p>Nama: <strong>${nama}</strong><br>
+               Tanggal Lahir: <strong>${tanggalLahir}</strong></p>
+
+            <!-- Isi Permohonan -->
+            <p>Dengan ini mengajukan permohonan dispensasi untuk keperluan sebagai berikut:</p>
+            <p><strong>${keperluan}</strong></p>
+
+            <!-- Penutup -->
+            <p>Demikian surat ini dibuat dengan sebenar-benarnya agar dapat dipergunakan sebagaimana mestinya. Atas perhatian dan kebijaksanaannya, kami ucapkan terima kasih.</p>
+
+            <!-- Tanda Tangan -->
+            <div style="text-align: right; margin-top: 30px;">
+                <p>Jatinunggal, ${new Date().toLocaleDateString('id-ID')}</p>
+                <p>Hormat kami,</p>
+                <br><br>
+                <p><strong>${nama}</strong></p>
+            </div>
+        </div>
+        `;
+
+        // Menyimpan surat content dalam elemen tersembunyi untuk pratinjau dan ekspor
+        document.getElementById('pdf-preview').innerHTML = suratContent;
+    }
+
+    function previewPDF() {
+        generateSurat();
+        const previewElement = document.getElementById('pdf-preview');
+        previewElement.style.display = 'block';
+
+        html2pdf().from(previewElement).set({
+            margin: 1,
+            filename: 'Surat_Dispensasi_Preview.pdf',
+            html2canvas: { scale: 2 },
+            jsPDF: { orientation: 'portrait' }
+        }).outputPdf('dataurlnewwindow'); // Tampilkan preview PDF di jendela baru
+    }
+
+    function exportSurat() {
+        generateSurat();
+        const exportElement = document.getElementById('pdf-preview');
+        
+        html2pdf().from(exportElement).set({
+            margin: 1,
+            filename: 'Surat_Dispensasi.pdf',
+            html2canvas: { scale: 2 },
+            jsPDF: { orientation: 'portrait' }
+        }).save(); // Ekspor dan unduh sebagai PDF
+    }
+</script>
+</body>
+</html>
